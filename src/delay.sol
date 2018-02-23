@@ -45,7 +45,7 @@ contract DSDelay is DSValue {
     }
 
     function poke() external {
-        require(now >= prev(zzz) + ONE_HOUR);
+        require(now >= zzz + ONE_HOUR);
         bytes32 wut;
         bool ok;
         (wut, ok) = src.peek();
