@@ -44,24 +44,17 @@ contract DSDelay is DSValue {
         return uint64(ts - (ts % ONE_HOUR));
     }
 
-    function next(uint ts) internal pure returns (uint64) {
-        return uint64(prev(ts) + ONE_HOUR);
-    }
-
-    function poke() external returns (bool) {
-        if (now >= next(zzz)) {
-            bytes32 wut;
-            bool ok;
-            (wut, ok) = src.peek();
-            if (ok) {
-                this.poke(nxt);
-                nxt = wut;
-                zzz = prev(now);
-            } else {
-                this.void();
-            }
-            return true;
+    function poke() external {
+        require(now >= prev(zzz) + ONE_HOUR);
+        bytes32 wut;
+        bool ok;
+        (wut, ok) = src.peek();
+        if (ok) {
+            this.poke(nxt);
+            nxt = wut;
+            zzz = prev(now);
+        } else {
+            this.void();
         }
-        return false;
     }
 }

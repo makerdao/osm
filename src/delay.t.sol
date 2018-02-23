@@ -83,7 +83,7 @@ contract DSDelayTest is DSTest {
         u.doPoke(delay);
     }
 
-    function testValueUnchangedBeforeOneHour() public {
+    function testFailBeforeOneHour() public {
         bytes32 val = 1;
         v.poke(val);
         delay = new DSDelay(v);
@@ -95,11 +95,7 @@ contract DSDelayTest is DSTest {
 
         // delay.warp(30 minutes);
 
-        bool success = delay.poke();
-
-        assertTrue(!success);
-        assertEq(delay.read(), val);
-        assertEq(delay.nxt(), val);
+        delay.poke();
     }
 
     function testNextValueChangedAfterOneHour() public {
@@ -114,10 +110,9 @@ contract DSDelayTest is DSTest {
         
         // delay.warp(1 hours);
 
-        bool success = delay.poke();
+        delay.poke();
 
         // Current value reads 1, but next value is 2
-        assertTrue(success);
         assertEq(delay.read(), val);
         assertEq(delay.nxt(), 2);
 
@@ -125,19 +120,19 @@ contract DSDelayTest is DSTest {
         
         // delay.warp(1 hours);
 
-        success = delay.poke();
+        delay.poke();
 
         // Current value reads 2, but next value is 3
-        assertTrue(success);
+        
         assertEq(delay.read(), 2);
         assertEq(delay.nxt(), 3);
 
         // delay.warp(1 hours);
 
-        success = delay.poke();
+        delay.poke();
 
         // Current value reads 3, next value still 3
-        assertTrue(success);
+        
         assertEq(delay.read(), 3);
         assertEq(delay.nxt(), 3);
     }
@@ -152,9 +147,8 @@ contract DSDelayTest is DSTest {
 
         // d.warp(1 hours);
 
-        bool success = d.poke();
+        d.poke();
 
-        assertTrue(!success);
         bool has;
         (, has) = d.peek();
 
@@ -162,16 +156,16 @@ contract DSDelayTest is DSTest {
 
         v.poke(2);
 
-        success = d.poke();
+        d.poke();
 
-        assertTrue(success);
+        
         assertEq(d.read(), 1);
 
         // d.warp(1 hours);
 
-        success = d.poke();
+        d.poke();
 
-        assertTrue(success);
+        
         assertEq(d.read(), 2);
         assertEq(d.nxt(), 2);
     }
