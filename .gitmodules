@@ -4,6 +4,3 @@
 [submodule "lib/ds-value"]
 	path = lib/ds-value
 	url = https://github.com/dapphub/ds-value
-[submodule "lib/ds-warp"]
-	path = lib/ds-warp
-	url = https://github.com/dapphub/ds-warp
