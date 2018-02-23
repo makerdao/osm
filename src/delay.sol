@@ -20,14 +20,15 @@ pragma solidity ^0.4.20;
 import "ds-value/value.sol";
 import "ds-warp/warp.sol";
 
-contract DSDelay is DSValue, DSWarp {
+contract DSDelay is DSValue {
     DSValue public src;
     
     bytes32 public nxt;
     uint64  public zzz;
 
+    uint constant ONE_HOUR = 3600;
+
     function DSDelay(DSValue src_) public {
-        warp(0);
         src = src_;
         bytes32 wut;
         bool ok;
@@ -36,23 +37,31 @@ contract DSDelay is DSValue, DSWarp {
             val = wut;
             has = true;
             nxt = wut;
-            zzz = era();
+            zzz = prev(now);
         }
     }
 
+    function prev(uint ts) internal pure returns (uint64) {
+        return uint64(ts - (ts % ONE_HOUR));
+    }
+
+    function next(uint ts) internal pure returns (uint64) {
+        return uint64(prev(ts) + ONE_HOUR);
+    }
+
     function poke() external returns (bool) {
-        if (era() - zzz >= 1 hours) {
+        if (now >= next(zzz)) {
             bytes32 wut;
             bool ok;
             (wut, ok) = src.peek();
             if (ok) {
                 this.poke(nxt);
                 nxt = wut;
-                zzz = era();
+                zzz = prev(now);
             } else {
                 this.void();
             }
-            return ok;
+            return true;
         }
         return false;
     }
