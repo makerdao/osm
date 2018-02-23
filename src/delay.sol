@@ -18,7 +18,6 @@
 pragma solidity ^0.4.20;
 
 import "ds-value/value.sol";
-import "ds-warp/warp.sol";
 
 contract DSDelay is DSValue {
     DSValue public src;

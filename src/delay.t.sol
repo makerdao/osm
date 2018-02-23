@@ -78,7 +78,7 @@ contract DSDelayTest is DSTest {
         v.poke(1);
         delay = new DSDelay(v);
 
-        delay.warp(1 hours);
+        // delay.warp(1 hours);
 
         u.doPoke(delay);
     }
@@ -93,7 +93,7 @@ contract DSDelayTest is DSTest {
 
         v.poke(2);
 
-        delay.warp(30 minutes);
+        // delay.warp(30 minutes);
 
         bool success = delay.poke();
 
@@ -112,7 +112,7 @@ contract DSDelayTest is DSTest {
 
         v.poke(2);
         
-        delay.warp(1 hours);
+        // delay.warp(1 hours);
 
         bool success = delay.poke();
 
@@ -123,7 +123,7 @@ contract DSDelayTest is DSTest {
 
         v.poke(3);
         
-        delay.warp(1 hours);
+        // delay.warp(1 hours);
 
         success = delay.poke();
 
@@ -132,7 +132,7 @@ contract DSDelayTest is DSTest {
         assertEq(delay.read(), 2);
         assertEq(delay.nxt(), 3);
 
-        delay.warp(1 hours);
+        // delay.warp(1 hours);
 
         success = delay.poke();
 
@@ -150,7 +150,7 @@ contract DSDelayTest is DSTest {
 
         v.void();
 
-        d.warp(1 hours);
+        // d.warp(1 hours);
 
         bool success = d.poke();
 
@@ -167,7 +167,7 @@ contract DSDelayTest is DSTest {
         assertTrue(success);
         assertEq(d.read(), 1);
 
-        d.warp(1 hours);
+        // d.warp(1 hours);
 
         success = d.poke();
 
