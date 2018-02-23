@@ -141,4 +141,38 @@ contract DSDelayTest is DSTest {
         assertEq(delay.read(), 3);
         assertEq(delay.nxt(), 3);
     }
+
+    function testPokeVoid() public {
+        v.poke(1);
+        DSDelay d = new DSDelay(v);
+
+        assertEq(d.read(), 1);
+
+        v.void();
+
+        d.warp(1 hours);
+
+        bool success = d.poke();
+
+        assertTrue(!success);
+        bool has;
+        (, has) = d.peek();
+
+        assertTrue(!has);
+
+        v.poke(2);
+
+        success = d.poke();
+
+        assertTrue(success);
+        assertEq(d.read(), 1);
+
+        d.warp(1 hours);
+
+        success = d.poke();
+
+        assertTrue(success);
+        assertEq(d.read(), 2);
+        assertEq(d.nxt(), 2);
+    }
 }
