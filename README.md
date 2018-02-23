@@ -12,6 +12,6 @@ If this `DSValue` has a valid value on creation, `ds-delay` with start with that
 
 After one hour has passed, `ds-delay` can be `poke`d. When this happens, the value queued will become the active `read` and `peek` value, and whatever value its `src` has will be queued as the next value.
 
-Note: to test, remove the comment on line
+Note: to test, comment the line
 
-`// warp(0);`
+`warp(0);`
