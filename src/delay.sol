@@ -25,6 +25,8 @@ contract DSDelay is DSValue {
     bytes32 public nxt;
     uint64  public zzz;
 
+    uint64  public hop = uint64(ONE_HOUR);
+
     uint constant ONE_HOUR = 3600;
 
     function DSDelay(DSValue src_) public {
@@ -40,12 +42,17 @@ contract DSDelay is DSValue {
         }
     }
 
-    function prev(uint ts) internal pure returns (uint64) {
-        return uint64(ts - (ts % ONE_HOUR));
+    function prev(uint ts) internal view returns (uint64) {
+        return uint64(ts - (ts % hop));
+    }
+
+    function step(uint ts) external auth {
+        require(ts % ONE_HOUR == 0);
+        hop = uint64(ts);
     }
 
     function poke() external {
-        require(now >= zzz + ONE_HOUR);
+        require(now >= zzz + hop);
         bytes32 wut;
         bool ok;
         (wut, ok) = src.peek();
