@@ -1,4 +1,4 @@
-/// delay.t.sol - tests for delay.sol
+/// osm.t.sol - tests for osm.sol
 
 // Copyright (C) 2018  DappHub, LLC
 
@@ -18,25 +18,26 @@
 pragma solidity ^0.4.20;
 
 import "ds-test/test.sol";
+import "ds-value/value.sol";
 
-import "./delay.sol";
+import "./osm.sol";
 
 contract TestUser {
 
-    function doPoke(DSDelay delay) public {
+    function doPoke(OSM delay) public {
         delay.poke();
     }
 }
 
-contract DSDelayTest is DSTest {
-    DSDelay delay;
+contract OSMTest is DSTest {
+    OSM delay;
     DSValue v;
 
     function setUp() public {
         v = new DSValue();
     }
 
-    function log(DSDelay d) public {
+    function log(OSM d) public {
         bytes32 val; bool has;
         (val, has) = d.peek();
         uint nxt = uint(d.nxt());
@@ -48,12 +49,12 @@ contract DSDelayTest is DSTest {
     }
 
     function testFailReadOnEmptyValue() public {
-        delay = new DSDelay(v);
+        delay = new OSM(v);
         delay.read();
     }
 
     function testPeekOnEmptyValue() public {
-        delay = new DSDelay(v);
+        delay = new OSM(v);
         bytes32 val; bool ok;
         (val, ok) = delay.peek();
 
@@ -67,7 +68,7 @@ contract DSDelayTest is DSTest {
         
         assertEq(v.read(), val);
         
-        delay = new DSDelay(v);
+        delay = new OSM(v);
 
         assertEq(delay.read(), val);
         assertEq(delay.nxt(), val);        
@@ -76,7 +77,7 @@ contract DSDelayTest is DSTest {
     function testUserCanPoke() public {
         TestUser u = new TestUser();
         v.poke(1);
-        delay = new DSDelay(v);
+        delay = new OSM(v);
 
         // delay.warp(1 hours);
 
@@ -86,7 +87,7 @@ contract DSDelayTest is DSTest {
     function testFailBeforeOneHour() public {
         bytes32 val = 1;
         v.poke(val);
-        delay = new DSDelay(v);
+        delay = new OSM(v);
 
         assertEq(delay.read(), val);
         assertEq(delay.nxt(), val);
@@ -101,7 +102,7 @@ contract DSDelayTest is DSTest {
     function testNextValueChangedAfterOneHour() public {
         bytes32 val = 1;
         v.poke(val);
-        delay = new DSDelay(v);
+        delay = new OSM(v);
 
         assertEq(delay.read(), val);
         assertEq(delay.nxt(), val);
@@ -139,7 +140,7 @@ contract DSDelayTest is DSTest {
 
     function testPokeVoid() public {
         v.poke(1);
-        DSDelay d = new DSDelay(v);
+        OSM d = new OSM(v);
 
         assertEq(d.read(), 1);
 

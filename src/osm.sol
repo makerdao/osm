@@ -1,4 +1,4 @@
-/// delay.sol - value that is activated after a timed delay
+/// osm.sol - oracle security module
 
 // Copyright (C) 2018  DappHub, LLC
 
@@ -17,27 +17,36 @@
 
 pragma solidity ^0.4.20;
 
+import "ds-auth/auth.sol";
 import "ds-value/value.sol";
 
-contract DSDelay is DSValue {
+// interface DSValue {
+//     function peek() external returns (bytes32,bool);
+//     function read() external returns (bytes32);
+// }
+
+contract OSM is DSAuth {
     DSValue public src;
     
-    bytes32 public nxt;
-    uint64  public zzz;
+    uint16 constant ONE_HOUR = 3600;
 
-    uint64  public hop = uint64(ONE_HOUR);
+    uint64 public hop = uint64(ONE_HOUR);
+    uint64 public zzz;
 
-    uint constant ONE_HOUR = 3600;
+    struct Feed {
+        uint128 val;
+        bool    has;
+    }
 
-    function DSDelay(DSValue src_) public {
+    Feed cur;
+    Feed nxt;
+    
+    function OSM(DSValue src_) public {
         src = src_;
-        bytes32 wut;
-        bool ok;
+        bytes32 wut; bool ok;
         (wut, ok) = src_.peek();
         if (ok) {
-            val = wut;
-            has = true;
-            nxt = wut;
+            cur = nxt = Feed(uint128(wut), ok);
             zzz = prev(now);
         }
     }
@@ -47,21 +56,26 @@ contract DSDelay is DSValue {
     }
 
     function step(uint ts) external auth {
-        require(ts % ONE_HOUR == 0);
+        // TODO: Reenable this
+        // require(ts % ONE_HOUR == 0);
         hop = uint64(ts);
     }
 
     function poke() external {
         require(now >= zzz + hop);
-        bytes32 wut;
-        bool ok;
+        bytes32 wut; bool ok;
         (wut, ok) = src.peek();
-        if (ok) {
-            this.poke(nxt);
-            nxt = wut;
-            zzz = prev(now);
-        } else {
-            this.void();
-        }
+        cur = nxt;
+        nxt = Feed(uint128(wut), ok);
+        zzz = prev(now);
+    }
+
+    function peek() public view returns (bytes32,bool) {
+        return (bytes32(cur.val), cur.has);
+    }
+
+    function read() public view returns (bytes32) {
+
+        return (bytes32(cur.val));
     }
 }
