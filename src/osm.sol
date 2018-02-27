@@ -74,6 +74,10 @@ contract OSM is DSAuth {
         return (bytes32(cur.val), cur.has);
     }
 
+    function peep() public view returns (bytes32,bool) {
+        return (bytes32(nxt.val), nxt.has);
+    }
+
     function read() public view returns (bytes32) {
 
         return (bytes32(cur.val));
