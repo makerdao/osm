@@ -28,9 +28,9 @@ import "ds-value/value.sol";
 contract OSM is DSAuth {
     DSValue public src;
     
-    uint16 constant ONE_HOUR = 3600;
+    uint16 constant ONE_HOUR = uint16(3600);
 
-    uint64 public hop = uint64(ONE_HOUR);
+    uint16 public hop = ONE_HOUR;
     uint64 public zzz;
 
     struct Feed {
@@ -55,14 +55,18 @@ contract OSM is DSAuth {
         return uint64(ts - (ts % hop));
     }
 
-    function step(uint ts) external auth {
+    function step(uint16 ts) external auth {
         // TODO: Reenable this
         // require(ts % ONE_HOUR == 0);
-        hop = uint64(ts);
+        hop = ts;
+    }
+
+    function pass() public view returns (bool ok) {
+        return now >= zzz + hop;
     }
 
     function poke() external {
-        require(now >= zzz + hop);
+        require(pass());
         bytes32 wut; bool ok;
         (wut, ok) = src.peek();
         cur = nxt;
@@ -79,7 +83,7 @@ contract OSM is DSAuth {
     }
 
     function read() public view returns (bytes32) {
-
+        require(cur.has);
         return (bytes32(cur.val));
     }
 }
