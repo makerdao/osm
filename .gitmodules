@@ -4,3 +4,6 @@
 [submodule "lib/ds-value"]
 	path = lib/ds-value
 	url = https://github.com/dapphub/ds-value
+[submodule "lib/ds-stop"]
+	path = lib/ds-stop
+	url = https://github.com/dapphub/ds-stop
