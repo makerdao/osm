@@ -52,7 +52,7 @@ contract OSM is DSAuth, DSStop {
         }
     }
 
-    function era() public view returns (uint) {
+    function era() internal view returns (uint) {
         return block.timestamp;
     }
 
