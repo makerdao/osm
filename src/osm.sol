@@ -18,6 +18,7 @@
 pragma solidity ^0.4.20;
 
 import "ds-auth/auth.sol";
+import "ds-stop/stop.sol";
 import "ds-value/value.sol";
 
 // interface DSValue {
@@ -25,7 +26,7 @@ import "ds-value/value.sol";
 //     function read() external returns (bytes32);
 // }
 
-contract OSM is DSAuth {
+contract OSM is DSAuth, DSStop {
     DSValue public src;
     
     uint16 constant ONE_HOUR = uint16(3600);
@@ -47,8 +48,12 @@ contract OSM is DSAuth {
         (wut, ok) = src_.peek();
         if (ok) {
             cur = nxt = Feed(uint128(wut), ok);
-            zzz = prev(now);
+            zzz = prev(era());
         }
+    }
+
+    function era() public view returns (uint) {
+        return block.timestamp;
     }
 
     function prev(uint ts) internal view returns (uint64) {
@@ -62,16 +67,16 @@ contract OSM is DSAuth {
     }
 
     function pass() public view returns (bool ok) {
-        return now >= zzz + hop;
+        return era() >= zzz + hop;
     }
 
-    function poke() external {
+    function poke() external stoppable {
         require(pass());
         bytes32 wut; bool ok;
         (wut, ok) = src.peek();
         cur = nxt;
         nxt = Feed(uint128(wut), ok);
-        zzz = prev(now);
+        zzz = prev(era());
     }
 
     function peek() public view returns (bytes32,bool) {
