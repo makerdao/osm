@@ -44,7 +44,8 @@ contract OSM is DSAuth, DSStop {
     
     function OSM(DSValue src_) public {
         src = src_;
-        bytes32 wut; bool ok;
+        bytes32 wut;
+        bool ok;
         (wut, ok) = src_.peek();
         if (ok) {
             cur = nxt = Feed(uint128(wut), ok);
@@ -61,8 +62,8 @@ contract OSM is DSAuth, DSStop {
     }
 
     function step(uint16 ts) external auth {
-        // TODO: Reenable this
-        // require(ts % ONE_HOUR == 0);
+        require(ts > 0);
+        require(ts % ONE_HOUR == 0);
         hop = ts;
     }
 
@@ -72,22 +73,23 @@ contract OSM is DSAuth, DSStop {
 
     function poke() external stoppable {
         require(pass());
-        bytes32 wut; bool ok;
+        bytes32 wut;
+        bool ok;
         (wut, ok) = src.peek();
         cur = nxt;
         nxt = Feed(uint128(wut), ok);
         zzz = prev(era());
     }
 
-    function peek() public view returns (bytes32,bool) {
+    function peek() external view returns (bytes32,bool) {
         return (bytes32(cur.val), cur.has);
     }
 
-    function peep() public view returns (bytes32,bool) {
+    function peep() external view returns (bytes32,bool) {
         return (bytes32(nxt.val), nxt.has);
     }
 
-    function read() public view returns (bytes32) {
+    function read() external view returns (bytes32) {
         require(cur.has);
         return (bytes32(cur.val));
     }
