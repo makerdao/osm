@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.23;
 
 import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
@@ -42,7 +42,7 @@ contract OSM is DSAuth, DSStop {
     Feed cur;
     Feed nxt;
     
-    function OSM(DSValue src_) public {
+    constructor (DSValue src_) public {
         src = src_;
         bytes32 wut;
         bool ok;
