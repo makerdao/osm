@@ -41,6 +41,8 @@ contract OSM is DSAuth, DSStop {
 
     Feed cur;
     Feed nxt;
+
+    event LogValue(bytes32 val);
     
     constructor (DSValue src_) public {
         src = src_;
@@ -79,6 +81,7 @@ contract OSM is DSAuth, DSStop {
         cur = nxt;
         nxt = Feed(uint128(wut), ok);
         zzz = prev(era());
+        emit LogValue(bytes32(cur.val));
     }
 
     function peek() external view returns (bytes32,bool) {
