@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
-import "ds-value/value.sol";
+// import "ds-value/value.sol";
 
-// interface DSValue {
-//     function peek() external returns (bytes32,bool);
-//     function read() external returns (bytes32);
-// }
+interface DSValue {
+    function peek() external returns (bytes32,bool);
+    function read() external returns (bytes32);
+}
 
 contract OSM is DSAuth, DSStop {
     DSValue public src;
@@ -46,9 +46,7 @@ contract OSM is DSAuth, DSStop {
     
     constructor (DSValue src_) public {
         src = src_;
-        bytes32 wut;
-        bool ok;
-        (wut, ok) = src_.peek();
+        (bytes32 wut, bool ok) = src_.peek();
         if (ok) {
             cur = nxt = Feed(uint128(wut), ok);
             zzz = prev(era());
@@ -65,8 +63,12 @@ contract OSM is DSAuth, DSStop {
 
     function step(uint16 ts) external auth {
         require(ts > 0);
-        require(ts % ONE_HOUR == 0);
         hop = ts;
+    }
+
+    function void() external auth {
+        cur = nxt = Feed(0, false);
+        stopped = true;
     }
 
     function pass() public view returns (bool ok) {
@@ -75,9 +77,7 @@ contract OSM is DSAuth, DSStop {
 
     function poke() external stoppable {
         require(pass());
-        bytes32 wut;
-        bool ok;
-        (wut, ok) = src.peek();
+        (bytes32 wut, bool ok) = src.peek();
         cur = nxt;
         nxt = Feed(uint128(wut), ok);
         zzz = prev(era());
