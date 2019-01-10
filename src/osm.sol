@@ -52,6 +52,10 @@ contract OSM is DSAuth, DSStop {
             zzz = prev(era());
         }
     }
+    
+    function change(DSValue src_) external auth {
+        src = src_;
+    }
 
     function era() internal view returns (uint) {
         return block.timestamp;
