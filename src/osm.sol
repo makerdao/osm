@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24;
 
 import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
@@ -48,7 +48,7 @@ contract OSM is DSAuth, DSStop {
         src = src_;
         (bytes32 wut, bool ok) = src_.peek();
         if (ok) {
-            cur = nxt = Feed(uint128(wut), ok);
+            cur = nxt = Feed(uint128(uint(wut)), ok);
             zzz = prev(era());
         }
     }
@@ -62,7 +62,7 @@ contract OSM is DSAuth, DSStop {
     }
 
     function step(uint16 ts) external auth {
-        require(ts > 0);
+        require(ts > 0, "");
         hop = ts;
     }
 
@@ -76,24 +76,24 @@ contract OSM is DSAuth, DSStop {
     }
 
     function poke() external stoppable {
-        require(pass());
+        require(pass(), "");
         (bytes32 wut, bool ok) = src.peek();
         cur = nxt;
-        nxt = Feed(uint128(wut), ok);
+        nxt = Feed(uint128(uint(wut)), ok);
         zzz = prev(era());
-        emit LogValue(bytes32(cur.val));
+        emit LogValue(bytes32(uint(cur.val)));
     }
 
     function peek() external view returns (bytes32,bool) {
-        return (bytes32(cur.val), cur.has);
+        return (bytes32(uint(cur.val)), cur.has);
     }
 
     function peep() external view returns (bytes32,bool) {
-        return (bytes32(nxt.val), nxt.has);
+        return (bytes32(uint(nxt.val)), nxt.has);
     }
 
     function read() external view returns (bytes32) {
-        require(cur.has);
-        return (bytes32(cur.val));
+        require(cur.has, "");
+        return (bytes32(uint(cur.val)));
     }
 }
