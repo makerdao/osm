@@ -20,7 +20,7 @@ pragma solidity >=0.4.24;
 import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
 
-interface DSValue {
+interface ValueLike {
     function peek() external returns (bytes32,bool);
     function read() external returns (bytes32);
 }
@@ -45,7 +45,7 @@ contract OSM is DSAuth, DSStop {
     
     constructor (address src_) public {
         src = src_;
-        (bytes32 wut, bool ok) = DSValue(src).peek();
+        (bytes32 wut, bool ok) = ValueLike(src).peek();
         if (ok) {
             cur = nxt = Feed(uint128(uint(wut)), ok);
             zzz = prev(era());
@@ -80,7 +80,7 @@ contract OSM is DSAuth, DSStop {
 
     function poke() external stoppable {
         require(pass(), "not-passed");
-        (bytes32 wut, bool ok) = DSValue(src).peek();
+        (bytes32 wut, bool ok) = ValueLike(src).peek();
         cur = nxt;
         nxt = Feed(uint128(uint(wut)), ok);
         zzz = prev(era());
