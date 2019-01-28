@@ -19,7 +19,6 @@ pragma solidity >=0.4.24;
 
 import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
-// import "ds-value/value.sol";
 
 interface DSValue {
     function peek() external returns (bytes32,bool);
@@ -27,7 +26,7 @@ interface DSValue {
 }
 
 contract OSM is DSAuth, DSStop {
-    DSValue public src;
+    address public src;
     
     uint16 constant ONE_HOUR = uint16(3600);
 
@@ -44,16 +43,16 @@ contract OSM is DSAuth, DSStop {
 
     event LogValue(bytes32 val);
     
-    constructor (DSValue src_) public {
+    constructor (address src_) public {
         src = src_;
-        (bytes32 wut, bool ok) = src_.peek();
+        (bytes32 wut, bool ok) = DSValue(src).peek();
         if (ok) {
             cur = nxt = Feed(uint128(uint(wut)), ok);
             zzz = prev(era());
         }
     }
     
-    function change(DSValue src_) external auth {
+    function change(address src_) external auth {
         src = src_;
     }
 
@@ -66,7 +65,7 @@ contract OSM is DSAuth, DSStop {
     }
 
     function step(uint16 ts) external auth {
-        require(ts > 0, "");
+        require(ts > 0, "ts-is-zero");
         hop = ts;
     }
 
@@ -80,8 +79,8 @@ contract OSM is DSAuth, DSStop {
     }
 
     function poke() external stoppable {
-        require(pass(), "");
-        (bytes32 wut, bool ok) = src.peek();
+        require(pass(), "not-passed");
+        (bytes32 wut, bool ok) = DSValue(src).peek();
         cur = nxt;
         nxt = Feed(uint128(uint(wut)), ok);
         zzz = prev(era());
@@ -97,7 +96,7 @@ contract OSM is DSAuth, DSStop {
     }
 
     function read() external view returns (bytes32) {
-        require(cur.has, "");
+        require(cur.has, "no-current-value");
         return (bytes32(uint(cur.val)));
     }
 }
