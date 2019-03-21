@@ -42,7 +42,7 @@ contract OSMTest is DSTest {
 
     function testVoid() public {
         assertTrue(!osm.stopped());                             //verify osm is active
-        osm.kiss(address(this));                                //add to whitelist
+        osm.kiss(address(this));                                //whitelist caller
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
         osm.poke();                                             //set new curent and next osm value
         (bytes32 val, bool has) = osm.peek();                   //pull current osm value
@@ -66,7 +66,7 @@ contract OSMTest is DSTest {
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
 
         osm.poke();                                             //set new current and next osm value
-        osm.kiss(address(this));                                //add to whitelist
+        osm.kiss(address(this));                                //whitelist caller
         (bytes32 val, bool has) = osm.peek();                   //pull current osm value
         assertEq(uint(val), 100 ether);                         //verify current osm value is 100
         assertTrue(has);                                        //verify current osm value is valid
@@ -82,6 +82,40 @@ contract OSMTest is DSTest {
 
     function testFailPoke() public {
         feed.poke(bytes32(uint(101 ether)));                    //set new current and next osm value
+        hevm.warp(uint(osm.hop() * 2 - 1));                     //warp 2 hops - 1 second
         osm.poke();                                             //attempt to set new current and next osm value
+    }
+
+    function testFailWhitelistPeep() public {
+        (bytes32 val, bool has) = osm.peep();                   //attempt to pull next osm value
+    }
+
+    function testWhitelistPeep() public {
+        osm.kiss(address(this));                                //whitelist caller
+        (bytes32 val, bool has) = osm.peep();                   //pull next osm value
+        assertEq(uint(val), 100 ether);                         //verify next osm value is 100
+        assertTrue(has);                                        //verify next osm value is valid
+    }
+
+    function testFailWhitelistPeek() public {
+        (bytes32 val, bool has) = osm.peek();                   //attempt to pull current osm value
+    }
+
+    function testWhitelistPeek() public {
+        osm.kiss(address(this));                                //whitelist caller
+        (bytes32 val, bool has) = osm.peek();                   //pull current osm value
+    }
+
+    function testKiss() public {
+        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
+        osm.kiss(address(this));                                //whitelist caller
+        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+    }
+
+    function testDiss() public {
+        osm.kiss(address(this));                                //whitelist caller
+        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+        osm.diss(address(this));                                //remove caller from whitelist
+        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
     }
 }
