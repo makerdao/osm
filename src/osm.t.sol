@@ -64,7 +64,6 @@ contract OSMTest is DSTest {
     function testPoke() public {
         feed.poke(bytes32(uint(101 ether)));                    //set new feed value
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
-
         osm.poke();                                             //set new current and next osm value
         osm.kiss(address(this));                                //whitelist caller
         (bytes32 val, bool has) = osm.peek();                   //pull current osm value
@@ -86,8 +85,8 @@ contract OSMTest is DSTest {
         osm.poke();                                             //attempt to set new current and next osm value
     }
 
-    function testFailWhitelistPeep() public {
-        (bytes32 val, bool has) = osm.peep();                   //attempt to pull next osm value
+    function testFailWhitelistPeep() public view {
+        osm.peep();                                             //attempt to pull next osm value
     }
 
     function testWhitelistPeep() public {
@@ -97,13 +96,14 @@ contract OSMTest is DSTest {
         assertTrue(has);                                        //verify next osm value is valid
     }
 
-    function testFailWhitelistPeek() public {
-        (bytes32 val, bool has) = osm.peek();                   //attempt to pull current osm value
+    function testFailWhitelistPeek() public view {
+        osm.peek();                                             //attempt to pull current osm value
     }
 
     function testWhitelistPeek() public {
         osm.kiss(address(this));                                //whitelist caller
-        (bytes32 val, bool has) = osm.peek();                   //pull current osm value
+        osm.peek();                                             //pull current osm value
+
     }
 
     function testKiss() public {
