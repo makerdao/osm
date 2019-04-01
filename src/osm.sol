@@ -15,9 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity >=0.4.24;
+pragma solidity >=0.5.2;
 
-import "ds-auth/auth.sol";
 import "ds-stop/stop.sol";
 
 interface ValueLike {
@@ -25,11 +24,16 @@ interface ValueLike {
     function read() external returns (bytes32);
 }
 
-contract OSM is DSAuth, DSStop {
-    address public src;
-    
-    uint16 constant ONE_HOUR = uint16(3600);
+contract OSM is DSStop {
 
+    // --- Auth ---
+    mapping (address => uint) public wards;
+    function rely(address guy) public auth { wards[guy] = 1; }
+    function deny(address guy) public auth { wards[guy] = 0; }
+    modifier auth { require(wards[msg.sender] == 1); _; }
+
+    address public src;
+    uint16 constant ONE_HOUR = uint16(3600);
     uint16 public hop = ONE_HOUR;
     uint64 public zzz;
 
@@ -41,15 +45,16 @@ contract OSM is DSAuth, DSStop {
     Feed cur;
     Feed nxt;
 
+    // Whitelisted contracts, set by an auth
+    mapping (address => bool) public bud;
+
+    modifier toll { require(bud[msg.sender], "contract-is-not-whitelisted"); _; }
+
     event LogValue(bytes32 val);
     
     constructor (address src_) public {
+        wards[msg.sender] = 1;
         src = src_;
-        (bytes32 wut, bool ok) = ValueLike(src).peek();
-        if (ok) {
-            cur = nxt = Feed(uint128(uint(wut)), ok);
-            zzz = prev(era());
-        }
     }
     
     function change(address src_) external auth {
@@ -81,22 +86,33 @@ contract OSM is DSAuth, DSStop {
     function poke() external stoppable {
         require(pass(), "not-passed");
         (bytes32 wut, bool ok) = ValueLike(src).peek();
-        cur = nxt;
-        nxt = Feed(uint128(uint(wut)), ok);
-        zzz = prev(era());
-        emit LogValue(bytes32(uint(cur.val)));
+        if (ok) {
+            cur = nxt;
+            nxt = Feed(uint128(uint(wut)), ok);
+            zzz = prev(era());
+            emit LogValue(bytes32(uint(cur.val)));
+        }
     }
 
-    function peek() external view returns (bytes32,bool) {
+    function peek() external view toll returns (bytes32,bool) {
         return (bytes32(uint(cur.val)), cur.has);
     }
 
-    function peep() external view returns (bytes32,bool) {
+    function peep() external view toll returns (bytes32,bool) {
         return (bytes32(uint(nxt.val)), nxt.has);
     }
 
-    function read() external view returns (bytes32) {
+    function read() external view toll returns (bytes32) {
         require(cur.has, "no-current-value");
         return (bytes32(uint(cur.val)));
+    }
+
+    function kiss(address a) external auth {
+        require (a != address(0), "no-contract-0");
+        bud[a] = true;
+    }
+
+    function diss(address a) external auth {
+        bud[a] = false;
     }
 }
