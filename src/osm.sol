@@ -17,14 +17,12 @@
 
 pragma solidity >=0.5.2;
 
-import "ds-stop/stop.sol";
-
 interface ValueLike {
     function peek() external returns (bytes32,bool);
     function read() external returns (bytes32);
 }
 
-contract OSM is DSStop {
+contract OSM {
 
     // --- Auth ---
     mapping (address => uint) public wards;
@@ -32,10 +30,14 @@ contract OSM is DSStop {
     function deny(address guy) public auth { wards[guy] = 0; }
     modifier auth { require(wards[msg.sender] == 1); _; }
 
+    // --- Stop ---
+    uint256 public stopped;
+    modifier stoppable { require(stopped == 0, "OSM-is-stopped"); _; }
+
     address public src;
-    uint16 constant ONE_HOUR = uint16(3600);
-    uint16 public hop = ONE_HOUR;
-    uint64 public zzz;
+    uint16  constant ONE_HOUR = uint16(3600);
+    uint16  public hop = ONE_HOUR;
+    uint64  public zzz;
 
     struct Feed {
         uint128 val;
@@ -56,7 +58,14 @@ contract OSM is DSStop {
         wards[msg.sender] = 1;
         src = src_;
     }
-    
+
+    function stop() public auth {
+        stopped = 1;
+    }
+    function start() public auth {
+        stopped = 0;
+    }
+
     function change(address src_) external auth {
         src = src_;
     }
