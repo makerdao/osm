@@ -107,15 +107,15 @@ contract OSMTest is DSTest {
     }
 
     function testKiss() public {
-        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
+        assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
         osm.kiss(address(this));                                //whitelist caller
-        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+        assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
     }
 
     function testDiss() public {
         osm.kiss(address(this));                                //whitelist caller
-        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+        assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
         osm.diss(address(this));                                //remove caller from whitelist
-        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
+        assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
     }
 }
