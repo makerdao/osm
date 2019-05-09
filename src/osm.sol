@@ -34,6 +34,12 @@ contract OSM {
     uint256 public stopped;
     modifier stoppable { require(stopped == 0, "OSM-is-stopped"); _; }
 
+    // --- Math ---
+    function add(uint64 x, uint64 y) internal pure returns (uint64 z) {
+        z = x + y;
+        require(z >= x);
+    }
+
     address public src;
     uint16  constant ONE_HOUR = uint16(3600);
     uint16  public hop = ONE_HOUR;
@@ -89,7 +95,7 @@ contract OSM {
     }
 
     function pass() public view returns (bool ok) {
-        return era() >= zzz + hop;
+        return era() >= add(zzz, hop);
     }
 
     function poke() external stoppable {
