@@ -81,6 +81,7 @@ contract OSM {
     }
 
     function prev(uint ts) internal view returns (uint64) {
+        require(hop != 0);
         return uint64(ts - (ts % hop));
     }
 
