@@ -17,10 +17,7 @@
 
 pragma solidity >=0.5.2;
 
-interface ValueLike {
-    function peek() external returns (bytes32,bool);
-    function read() external returns (bytes32);
-}
+import "ds-value/value.sol";
 
 contract OSM {
 
@@ -101,7 +98,7 @@ contract OSM {
 
     function poke() external stoppable {
         require(pass(), "not-passed");
-        (bytes32 wut, bool ok) = ValueLike(src).peek();
+        (bytes32 wut, bool ok) = DSValue(src).peek();
         if (ok) {
             cur = nxt;
             nxt = Feed(uint128(uint(wut)), 1);
