@@ -1,13 +1,8 @@
 pragma solidity >=0.5.2;
 
-import "ds-stop/stop.sol";
+import "ds-value/value.sol";
 
-interface ValueLike {
-    function peek() external returns (bytes32,bool);
-    function read() external returns (bytes32);
-}
-
-contract OSM is DSStop {
+contract OSM {
 
     // --- Auth ---
     mapping (address => uint) public wards;
@@ -15,23 +10,33 @@ contract OSM is DSStop {
     function deny(address guy) public auth { wards[guy] = 0; }
     modifier auth { require(wards[msg.sender] == 1); _; }
 
+    // --- Stop ---
+    uint256 public stopped;
+    modifier stoppable { require(stopped == 0, "OSM-is-stopped"); _; }
+
+    // --- Math ---
+    function add(uint64 x, uint64 y) internal pure returns (uint64 z) {
+        z = x + y;
+        require(z >= x);
+    }
+
     address public src;
-    uint16 constant ONE_HOUR = uint16(3600);
-    uint16 public hop = ONE_HOUR;
-    uint64 public zzz;
+    uint16  constant ONE_HOUR = uint16(3600);
+    uint16  public hop = ONE_HOUR;
+    uint64  public zzz;
 
     struct Feed {
         uint128 val;
-        bool    has;
+        uint128 has;
     }
 
     Feed cur;
     Feed nxt;
 
     // Whitelisted contracts, set by an auth
-    mapping (address => bool) public bud;
+    mapping (address => uint256) public bud;
 
-    modifier toll { require(bud[msg.sender], "contract-is-not-whitelisted"); _; }
+    modifier toll { require(bud[msg.sender] == 1, "contract-is-not-whitelisted"); _; }
 
     event LogValue(bytes32 val);
     
@@ -39,7 +44,14 @@ contract OSM is DSStop {
         wards[msg.sender] = 1;
         src = src_;
     }
-    
+
+    function stop() public auth {
+        stopped = 1;
+    }
+    function start() public auth {
+        stopped = 0;
+    }
+
     function change(address src_) external auth {
         src = src_;
     }
@@ -49,6 +61,7 @@ contract OSM is DSStop {
     }
 
     function prev(uint ts) internal view returns (uint64) {
+        require(hop != 0);
         return uint64(ts - (ts % hop));
     }
 
@@ -58,44 +71,44 @@ contract OSM is DSStop {
     }
 
     function void() external auth {
-        cur = nxt = Feed(0, false);
-        stopped = true;
+        cur = nxt = Feed(0, 0);
+        stopped = 1;
     }
 
     function pass() public view returns (bool ok) {
-        return era() >= zzz + hop;
+        return era() >= add(zzz, hop);
     }
 
     function poke() external stoppable {
         require(pass(), "not-passed");
-        (bytes32 wut, bool ok) = ValueLike(src).peek();
+        (bytes32 wut, bool ok) = DSValue(src).peek();
         if (ok) {
             cur = nxt;
-            nxt = Feed(uint128(uint(wut)), ok);
+            nxt = Feed(uint128(uint(wut)), 1);
             zzz = prev(era());
             emit LogValue(bytes32(uint(cur.val)));
         }
     }
 
     function peek() external view toll returns (bytes32,bool) {
-        return (bytes32(uint(cur.val)), cur.has);
+        return (bytes32(uint(cur.val)), cur.has == 1);
     }
 
     function peep() external view toll returns (bytes32,bool) {
-        return (bytes32(uint(nxt.val)), nxt.has);
+        return (bytes32(uint(nxt.val)), nxt.has == 1);
     }
 
     function read() external view toll returns (bytes32) {
-        require(cur.has, "no-current-value");
+        require(cur.has == 1, "no-current-value");
         return (bytes32(uint(cur.val)));
     }
 
     function kiss(address a) external auth {
         require (a != address(0), "no-contract-0");
-        bud[a] = true;
+        bud[a] = 1;
     }
 
     function diss(address a) external auth {
-        bud[a] = false;
+        bud[a] = 0;
     }
 }

@@ -41,7 +41,7 @@ contract OSMTest is DSTest {
     }
 
     function testVoid() public {
-        assertTrue(!osm.stopped());                             //verify osm is active
+        assertTrue(osm.stopped() == 0);                         //verify osm is active
         osm.kiss(address(this));                                //whitelist caller
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
         osm.poke();                                             //set new curent and next osm value
@@ -52,7 +52,7 @@ contract OSMTest is DSTest {
         assertEq(uint(val), 100 ether);                         //verify next osm value is 100
         assertTrue(has);                                        //verify next osm value is valid
         osm.void();                                             //void all osm values
-        assertTrue(osm.stopped());                              //verify osm is inactive
+        assertTrue(osm.stopped() == 1);                         //verify osm is inactive
         (val, has) = osm.peek();                                //pull current osm value
         assertEq(uint(val), 0);                                 //verify current osm value is 0
         assertTrue(!has);                                       //verify current osm value is invalid
@@ -107,15 +107,15 @@ contract OSMTest is DSTest {
     }
 
     function testKiss() public {
-        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
+        assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
         osm.kiss(address(this));                                //whitelist caller
-        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+        assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
     }
 
     function testDiss() public {
         osm.kiss(address(this));                                //whitelist caller
-        assertTrue(osm.bud(address(this)));                     //verify caller is whitelisted
+        assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
         osm.diss(address(this));                                //remove caller from whitelist
-        assertTrue(!osm.bud(address(this)));                    //verify caller is not whitelisted
+        assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
     }
 }
