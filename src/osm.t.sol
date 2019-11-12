@@ -13,7 +13,7 @@ contract OSMTest is DSTest {
 
     DSValue feed;
     OSM osm;
-    address[] bud;
+    address bud;
 
     function setUp() public {
         feed = new DSValue();                                   //create new feed
@@ -22,7 +22,7 @@ contract OSMTest is DSTest {
         hevm = Hevm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);//get hevm instance
         hevm.warp(uint(osm.hop()));                             //warp 1 hop
         osm.poke();                                             //set new next osm value
-        bud = [address(this)];                                  //authorized reader
+        bud = address(this);                                  //authorized reader
     }
 
     function testChangeValue() public {

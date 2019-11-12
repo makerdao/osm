@@ -93,7 +93,7 @@ contract OSM is LibNote {
     }
 
     function prev(uint ts) internal view returns (uint64) {
-        require(hop != 0);
+        require(hop != 0, "OSM/hop-is-zero");
         return uint64(ts - (ts % hop));
     }
 
@@ -133,6 +133,17 @@ contract OSM is LibNote {
     function read() external view toll returns (bytes32) {
         require(cur.has == 1, "OSM/no-current-value");
         return (bytes32(uint(cur.val)));
+    }
+
+
+
+    function kiss(address a) external note auth {
+        require(a != address(0), "OSM/no-contract-0");
+        bud[a] = 1;
+    }
+
+    function diss(address a) external note auth {
+        bud[a] = 0;
     }
 
     function kiss(address[] calldata a) external note auth {
