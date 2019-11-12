@@ -1,4 +1,4 @@
-pragma solidity >=0.5.2;
+pragma solidity >=0.5.10;
 
 import "ds-test/test.sol";
 import {DSValue} from "ds-value/value.sol";
@@ -13,6 +13,7 @@ contract OSMTest is DSTest {
 
     DSValue feed;
     OSM osm;
+    address[] bud;
 
     function setUp() public {
         feed = new DSValue();                                   //create new feed
@@ -21,6 +22,7 @@ contract OSMTest is DSTest {
         hevm = Hevm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);//get hevm instance
         hevm.warp(uint(osm.hop()));                             //warp 1 hop
         osm.poke();                                             //set new next osm value
+        bud = [address(this)];                                  //authorized reader
     }
 
     function testChangeValue() public {
@@ -42,7 +44,7 @@ contract OSMTest is DSTest {
 
     function testVoid() public {
         assertTrue(osm.stopped() == 0);                         //verify osm is active
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                          //whitelist caller
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
         osm.poke();                                             //set new curent and next osm value
         (bytes32 val, bool has) = osm.peek();                   //pull current osm value
@@ -65,7 +67,7 @@ contract OSMTest is DSTest {
         feed.poke(bytes32(uint(101 ether)));                    //set new feed value
         hevm.warp(uint(osm.hop() * 2));                         //warp 2 hops
         osm.poke();                                             //set new current and next osm value
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                          //whitelist caller
         (bytes32 val, bool has) = osm.peek();                   //pull current osm value
         assertEq(uint(val), 100 ether);                         //verify current osm value is 100
         assertTrue(has);                                        //verify current osm value is valid
@@ -90,7 +92,7 @@ contract OSMTest is DSTest {
     }
 
     function testWhitelistPeep() public {
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                          //whitelist caller
         (bytes32 val, bool has) = osm.peep();                   //pull next osm value
         assertEq(uint(val), 100 ether);                         //verify next osm value is 100
         assertTrue(has);                                        //verify next osm value is valid
@@ -101,21 +103,21 @@ contract OSMTest is DSTest {
     }
 
     function testWhitelistPeek() public {
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                //whitelist caller
         osm.peek();                                             //pull current osm value
 
     }
 
     function testKiss() public {
         assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                //whitelist caller
         assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
     }
 
     function testDiss() public {
-        osm.kiss(address(this));                                //whitelist caller
+        osm.kiss(bud);                                //whitelist caller
         assertTrue(osm.bud(address(this)) == 1);                //verify caller is whitelisted
-        osm.diss(address(this));                                //remove caller from whitelist
+        osm.diss(bud);                                //remove caller from whitelist
         assertTrue(osm.bud(address(this)) == 0);                //verify caller is not whitelisted
     }
 }
