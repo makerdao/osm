@@ -4,8 +4,8 @@ import "ds-test/test.sol";
 import {DSValue} from "ds-value/value.sol";
 import {OSM} from "./osm.sol";
 
-contract Hevm {
-    function warp(uint256) public;
+interface Hevm {
+    function warp(uint256) external;
 }
 
 contract OSMTest is DSTest {
