@@ -1,4 +1,4 @@
-all    :; dapp build
+all    :; dapp --use solc:0.5.12 build
 clean  :; dapp clean
-test   :; dapp test
-deploy :; dapp create OSM
+test   :; dapp --use solc:0.5.12 test
+deploy :; dapp --use solc:0.5.12 create OSM
