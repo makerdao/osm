@@ -1,4 +1,5 @@
 # Oracle Security Module
+![Build Status](https://github.com/makerdao/osm/actions/workflows/.github/workflows/tests.yaml/badge.svg?branch=master)
 
 This contract is given a `DSValue` as a source to read from. You set a time interval with `step`. Whenever that `step` time has passed, it will let you `poke`. When you `poke` it reads the value from the source and stores it. The previous stored value becomes the current value. 
 
